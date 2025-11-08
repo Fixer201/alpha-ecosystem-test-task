@@ -24,10 +24,6 @@ const nextConfig: NextConfig = {
                 hostname: 'pinterest.com',
             },
             {
-                protocol: 'https',
-                hostname: 'via.placeholder.com',
-            },
-            {
                 protocol: "https",
                 hostname: 'pin.it',
             }
