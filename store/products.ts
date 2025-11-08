@@ -32,20 +32,35 @@ export const useProductsStore = create<ProductsState>()(
             fetchProducts: async () => {
                 set({isLoading: true});
                 try {
+                    const currentProducts = get().products;
+
+                    // Разделяем кастомные продукты (ID > 1000) от продуктов API
+                    const customProducts = currentProducts.filter(p => parseInt(p.id) > 1000);
+
+                    // Создаём карту для быстрого поиска isFavorite статуса
+                    const favoritesMap = new Map(
+                        currentProducts.map(p => [p.id, p.isFavorite])
+                    );
+
                     const response = await fetch('https://fakestoreapi.com/products');
                     const data = await response.json();
 
-                    const products: Product[] = data.map((item: any) => ({
+                    // Продукты из API с сохранением isFavorite
+                    const apiProducts: Product[] = data.map((item: any) => ({
                         id: item.id.toString(),
                         name: item.title,
                         description: item.description,
                         price: `$${item.price}`,
                         image: item.image,
                         category: item.category,
-                        isFavorite: false,
+                        // Сохраняем isFavorite если товар уже был в списке
+                        isFavorite: favoritesMap.get(item.id.toString()) || false,
                     }));
 
-                    set({products, isLoading: false});
+                    // Объединяем: API продукты + кастомные
+                    const mergedProducts = [...apiProducts, ...customProducts];
+
+                    set({products: mergedProducts, isLoading: false});
                 } catch (error) {
                     console.error('Failed to fetch products:', error);
                     set({isLoading: false});
