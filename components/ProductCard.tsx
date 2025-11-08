@@ -64,10 +64,10 @@ export function ProductCard({ id, name, description, price, image, isFavorite }:
         </div>
 
         <div className="p-4 space-y-3 flex-1 flex flex-col">
-          <h3 className="text-lg font-semibold text-black line-clamp-2">
+          <h3 className="text-lg font-semibold text-black line-clamp-2 break-words">
             {name}
           </h3>
-          <p className="text-neutral-600 text-sm line-clamp-3 flex-1">
+          <p className="text-neutral-600 text-sm line-clamp-3 break-words">
             {description}
           </p>
           <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
