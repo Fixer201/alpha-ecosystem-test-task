@@ -15,8 +15,16 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
   return <EditProductClient id={id} />;
 }
 
-export function generateStaticParams() {
-  return [
-    { id: '1' },
-  ];
+export async function generateStaticParams() {
+  try {
+    const response = await fetch('https://fakestoreapi.com/products');
+    const products = await response.json();
+
+    return products.map((product: any) => ({
+      id: product.id.toString(),
+    }));
+  } catch (error) {
+    console.error('Failed to fetch products for static generation:', error);
+    return [];
+  }
 }
