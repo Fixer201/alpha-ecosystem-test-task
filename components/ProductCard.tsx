@@ -33,7 +33,7 @@ export function ProductCard({ id, name, description, price, image, isFavorite }:
   };
 
   return (
-    <Link href={`/products/${id}`}>
+    <Link href={`/products/detail?id=${id}`}>
       <article className="border border-neutral-200 hover:border-black transition-colors h-full flex flex-col group cursor-pointer">
         <div className="relative w-full h-48 bg-neutral-100">
           <Image

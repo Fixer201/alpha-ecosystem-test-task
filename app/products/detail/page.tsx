@@ -4,16 +4,14 @@ import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft, Pencil, Trash2} from "lucide-react";
 import {useProductsStore} from "@/store/products";
-import {notFound, useRouter} from "next/navigation";
-import {useState} from "react";
+import {useRouter, useSearchParams} from "next/navigation";
+import {useState, Suspense} from "react";
 import Image from "next/image";
 
-interface ProductDetailClientProps {
-    id: string;
-}
-
-export default function ProductDetailClient({id}: ProductDetailClientProps) {
-    const product = useProductsStore((state) => state.getProductById(id));
+function ProductDetailContent() {
+    const searchParams = useSearchParams();
+    const id = searchParams.get("id");
+    const product = useProductsStore((state) => state.getProductById(id || ""));
     const removeProduct = useProductsStore((state) => state.removeProduct);
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
@@ -27,7 +25,7 @@ export default function ProductDetailClient({id}: ProductDetailClientProps) {
 
         try {
             // Delete from store
-            removeProduct(id);
+            removeProduct(id || "");
 
             // Redirect to products page
             router.push("/products");
@@ -38,8 +36,30 @@ export default function ProductDetailClient({id}: ProductDetailClientProps) {
         }
     };
 
+    if (!id) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-black mb-4">Product ID is missing</h1>
+                    <Link href="/products">
+                        <Button>Go to Products</Button>
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     if (!product) {
-        notFound();
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-black mb-4">Product not found</h1>
+                    <Link href="/products">
+                        <Button>Go to Products</Button>
+                    </Link>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -76,7 +96,7 @@ export default function ProductDetailClient({id}: ProductDetailClientProps) {
                             </div>
 
                             <div className="flex gap-2">
-                                <Link href={`/products/${id}/edit`}>
+                                <Link href={`/products/edit?id=${id}`}>
                                     <Button
                                         variant="outline"
                                         size="sm"
@@ -132,5 +152,19 @@ export default function ProductDetailClient({id}: ProductDetailClientProps) {
                 </section>
             </main>
         </div>
+    );
+}
+
+export default function ProductDetailPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-neutral-600">Loading...</p>
+                </div>
+            </div>
+        }>
+            <ProductDetailContent />
+        </Suspense>
     );
 }

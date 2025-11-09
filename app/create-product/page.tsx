@@ -12,7 +12,7 @@ export default function CreateProductPage() {
     const addProduct = useProductsStore((state) => state.addProduct);
     const router = useRouter();
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
 
@@ -21,42 +21,24 @@ export default function CreateProductPage() {
         const description = formData.get("description") as string;
         const price = formData.get("price") as string;
         const image = formData.get("image") as string;
-        const category = formData.get("category") as string;
+        const category = (formData.get("category") as string) || "other";
 
         try {
-            // Add to local store
             addProduct({
                 name,
                 description,
                 price: `$${price}`,
-                image: image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23e5e5e5'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E",
-                category: category || 'other',
+                image:
+                    image ||
+                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23e5e5e5'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E",
+                category,
             });
 
-            // Also send to API
-            const response = await fetch('/api/products', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name,
-                    description,
-                    price: `$${price}`,
-                    image,
-                    category,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create product');
-            }
-
-            // Redirect to products page
-            router.push('/products');
+            // Переход к списку товаров
+            router.push("/products");
         } catch (error) {
-            console.error('Error creating product:', error);
-            alert('Failed to create product');
+            console.error("Error creating product:", error);
+            alert("Failed to create product");
         } finally {
             setIsSubmitting(false);
         }
@@ -67,7 +49,11 @@ export default function CreateProductPage() {
             <main className="container mx-auto px-6 py-24 max-w-2xl">
                 <section className="space-y-8">
                     <Link href="/">
-                        <Button variant="ghost" size="sm" className="text-neutral-600 hover:text-black -ml-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-neutral-600 hover:text-black -ml-2"
+                        >
                             <ArrowLeft className="mr-2 h-4 w-4"/>
                             Back to Home
                         </Button>
@@ -85,7 +71,10 @@ export default function CreateProductPage() {
 
                 <form onSubmit={handleSubmit} className="mt-12 space-y-8">
                     <div className="space-y-2">
-                        <label htmlFor="name" className="block text-sm font-semibold text-black">
+                        <label
+                            htmlFor="name"
+                            className="block text-sm font-semibold text-black"
+                        >
                             Product Name
                         </label>
                         <input
@@ -99,7 +88,10 @@ export default function CreateProductPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="description" className="block text-sm font-semibold text-black">
+                        <label
+                            htmlFor="description"
+                            className="block text-sm font-semibold text-black"
+                        >
                             Description
                         </label>
                         <textarea
@@ -113,7 +105,10 @@ export default function CreateProductPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="price" className="block text-sm font-semibold text-black">
+                        <label
+                            htmlFor="price"
+                            className="block text-sm font-semibold text-black"
+                        >
                             Price
                         </label>
                         <div className="relative">
@@ -134,7 +129,10 @@ export default function CreateProductPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="image" className="block text-sm font-semibold text-black">
+                        <label
+                            htmlFor="image"
+                            className="block text-sm font-semibold text-black"
+                        >
                             Image URL
                         </label>
                         <input
@@ -144,11 +142,16 @@ export default function CreateProductPage() {
                             className="w-full px-4 py-3 border border-neutral-300 focus:border-black focus:outline-none transition-colors"
                             placeholder="https://example.com/image.jpg"
                         />
-                        <p className="text-xs text-neutral-500">Optional: Leave empty for placeholder image</p>
+                        <p className="text-xs text-neutral-500">
+                            Optional: Leave empty for placeholder image
+                        </p>
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="category" className="block text-sm font-semibold text-black">
+                        <label
+                            htmlFor="category"
+                            className="block text-sm font-semibold text-black"
+                        >
                             Category
                         </label>
                         <select
@@ -174,8 +177,12 @@ export default function CreateProductPage() {
                             {isSubmitting ? "Creating..." : "Create Product"}
                         </Button>
                         <Link href="/">
-                            <Button type="button" variant="outline" size="lg"
-                                    className="border-black text-black hover:bg-neutral-100">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="lg"
+                                className="border-black text-black hover:bg-neutral-100"
+                            >
                                 Cancel
                             </Button>
                         </Link>

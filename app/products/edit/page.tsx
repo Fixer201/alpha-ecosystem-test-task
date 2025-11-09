@@ -3,16 +3,14 @@
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft} from "lucide-react";
-import {FormEvent, useState} from "react";
+import {FormEvent, useState, Suspense} from "react";
 import {useProductsStore} from "@/store/products";
-import {useRouter, notFound} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 
-interface EditProductClientProps {
-  id: string;
-}
-
-export default function EditProductClient({ id }: EditProductClientProps) {
-  const product = useProductsStore((state) => state.getProductById(id));
+function EditProductContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+  const product = useProductsStore((state) => state.getProductById(id || ""));
   const updateProduct = useProductsStore((state) => state.updateProduct);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,7 +28,7 @@ export default function EditProductClient({ id }: EditProductClientProps) {
 
     try {
       // Update in local store
-      updateProduct(id, {
+      updateProduct(id || "", {
         name,
         description,
         price: `$${price}`,
@@ -39,7 +37,7 @@ export default function EditProductClient({ id }: EditProductClientProps) {
       });
 
       // Redirect back to product detail
-      router.push(`/products/${id}`);
+      router.push(`/products/detail?id=${id}`);
     } catch (error) {
       console.error('Error updating product:', error);
       alert('Failed to update product');
@@ -48,15 +46,37 @@ export default function EditProductClient({ id }: EditProductClientProps) {
     }
   };
 
+  if (!id) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-black mb-4">Product ID is missing</h1>
+          <Link href="/products">
+            <Button>Go to Products</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
-    notFound();
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-black mb-4">Product not found</h1>
+          <Link href="/products">
+            <Button>Go to Products</Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-white">
       <main className="container mx-auto px-6 py-24 max-w-2xl">
         <section className="space-y-8">
-          <Link href={`/products/${id}`}>
+          <Link href={`/products/detail?id=${id}`}>
             <Button variant="ghost" size="sm" className="text-neutral-600 hover:text-black -ml-2">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Product
@@ -167,7 +187,7 @@ export default function EditProductClient({ id }: EditProductClientProps) {
             >
               {isSubmitting ? "Updating..." : "Update Product"}
             </Button>
-            <Link href={`/products/${id}`}>
+            <Link href={`/products/detail?id=${id}`}>
               <Button type="button" variant="outline" size="lg" className="border-black text-black hover:bg-neutral-100">
                 Cancel
               </Button>
@@ -176,5 +196,19 @@ export default function EditProductClient({ id }: EditProductClientProps) {
         </form>
       </main>
     </div>
+  );
+}
+
+export default function EditProductPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-neutral-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <EditProductContent />
+    </Suspense>
   );
 }
